@@ -14,7 +14,7 @@ public class MyModule extends AbstractModule {
         ScopedProxyBinder.using(binder())
                 .bind(MyInterface.class)
                 .to(MyInterfaceImpl.class)
-                .in(SessionScope.class);
+                .in(SessionScoped.class);
     }
 }
 ```
