@@ -11,4 +11,8 @@ final class ObjenesisHolder {
     static Objenesis getInstance() {
         return INSTANCE;
     }
+
+    private ObjenesisHolder() {
+        // hidden
+    }
 }

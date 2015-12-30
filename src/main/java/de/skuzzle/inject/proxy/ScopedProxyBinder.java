@@ -26,6 +26,7 @@ import com.google.inject.binder.LinkedBindingBuilder;
 import com.google.inject.binder.ScopedBindingBuilder;
 import com.google.inject.internal.BindingBuilder;
 import com.google.inject.spi.Dependency;
+import com.google.inject.spi.HasDependencies;
 import com.google.inject.spi.Toolable;
 
 /**
@@ -235,7 +236,7 @@ public final class ScopedProxyBinder {
         }
     }
 
-    private static class ScopedProxyProvider<T> implements Provider<T> {
+    private static class ScopedProxyProvider<T> implements Provider<T>, HasDependencies {
 
         final Key<T> sourceKey;
         final Key<T> rewritten;
@@ -277,7 +278,7 @@ public final class ScopedProxyBinder {
             return this.ref;
         }
 
-        //@Override
+        @Override
         public Set<Dependency<?>> getDependencies() {
             return this.dependencies;
         }
