@@ -6,6 +6,7 @@ import static org.junit.Assert.assertNotEquals;
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.google.inject.AbstractModule;
@@ -87,6 +88,7 @@ public class ScopedProxyBinderTest {
     }
 
     @Test
+    @Ignore
     public void testBindNoTarget() throws Exception {
         final Injector injector = Guice.createInjector(new AbstractModule() {
 
