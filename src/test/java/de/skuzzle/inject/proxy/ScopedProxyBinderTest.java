@@ -2,6 +2,7 @@ package de.skuzzle.inject.proxy;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNull;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -24,10 +25,28 @@ public class ScopedProxyBinderTest {
     }
 
     public static class ConcreteSampleClassWithCtor {
+        private final SampleClass s;
+
         @Inject
         public ConcreteSampleClassWithCtor(SampleClass s) {
-
+            this.s = s;
         }
+    }
+
+    public static class ConcreteSampleClassWithMultipleCtors {
+        private final SampleClass s;
+
+        public ConcreteSampleClassWithMultipleCtors() {
+            this.s = null;
+        }
+
+        public ConcreteSampleClassWithMultipleCtors(SampleClass s) {
+            this.s = s;
+        }
+    }
+
+    public static class ConcreateSampleClassWithPrivateCtor {
+        private ConcreateSampleClassWithPrivateCtor() {}
     }
 
     public static class SampleClassImpl implements SampleClass {
@@ -185,5 +204,53 @@ public class ScopedProxyBinderTest {
                         .asEagerSingleton();
             }
         });
+    }
+
+    @Test
+    public void testNullConstructionStrategy() throws Exception {
+        final Injector injector = Guice.createInjector(new AbstractModule() {
+
+            @Override
+            protected void configure() {
+                ScopedProxyBinder.using(binder())
+                        .andConstructionStrategy(ConstructionStrategies.NULL_VALUES)
+                        .bind(ConcreteSampleClassWithCtor.class)
+                        .to(ConcreteSampleClassWithCtor.class);
+            }
+        });
+
+        final ConcreteSampleClassWithCtor instance = injector.getInstance(
+                ConcreteSampleClassWithCtor.class);
+        assertNull(instance.s);
+    }
+
+    @Test(expected = CreationException.class)
+    public void testNullConstructionStrategyMultipleCtors() throws Exception {
+        final Injector injector = Guice.createInjector(new AbstractModule() {
+
+            @Override
+            protected void configure() {
+                ScopedProxyBinder.using(binder())
+                        .andConstructionStrategy(ConstructionStrategies.NULL_VALUES)
+                        .bind(ConcreteSampleClassWithMultipleCtors.class)
+                        .to(ConcreteSampleClassWithMultipleCtors.class);
+            }
+        });
+        injector.getInstance(ConcreteSampleClassWithMultipleCtors.class);
+    }
+
+    @Test(expected = CreationException.class)
+    public void testNullConstructionStrategyNoCtor() throws Exception {
+        final Injector injector = Guice.createInjector(new AbstractModule() {
+
+            @Override
+            protected void configure() {
+                ScopedProxyBinder.using(binder())
+                        .andConstructionStrategy(ConstructionStrategies.NULL_VALUES)
+                        .bind(ConcreateSampleClassWithPrivateCtor.class)
+                        .to(ConcreateSampleClassWithPrivateCtor.class);
+            }
+        });
+        injector.getInstance(ConcreteSampleClassWithMultipleCtors.class);
     }
 }

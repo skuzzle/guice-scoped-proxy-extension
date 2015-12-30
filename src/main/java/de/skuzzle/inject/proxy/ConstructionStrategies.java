@@ -2,15 +2,16 @@ package de.skuzzle.inject.proxy;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Modifier;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.stream.Collectors;
 
 import org.objenesis.Objenesis;
 import org.objenesis.instantiator.ObjectInstantiator;
 
 import com.google.inject.Injector;
 import com.google.inject.internal.Errors;
-import com.google.inject.spi.InjectionPoint;
-
-import net.sf.cglib.proxy.FixedValue;
 
 /**
  * Holds some useful default {@link ConstructionStrategy construction
@@ -35,44 +36,6 @@ public enum ConstructionStrategies implements ConstructionStrategy {
         }
     },
     /**
-     * Uses the injector to create the proxy object. If outside of their scope,
-     * this strategy will inject unscoped objects into the constructor and
-     * fields. If the scope does not allow to inject types outside their scope,
-     * errors might occur.
-     */
-    INJECTOR_ONLY {
-
-        @Override
-        public <T> T createInstance(Class<T> proxyClass, Injector injector,
-                Errors errors) {
-            return injector.getInstance(proxyClass);
-        }
-    },
-
-    DEEP_MOCKS {
-
-        @Override
-        public <T> T createInstance(Class<T> proxyClass, Injector injector,
-                Errors errors) {
-            final Constructor<T> ctor = getConstructorFor(proxyClass);
-            final Object[] args = new Object[ctor.getParameterCount()];
-            for (int i = 0; i < args.length; ++i) {
-                final Class<?> argType = ctor.getParameterTypes()[i];
-                args[i] = InstanceBuilder
-                        .forType(argType)
-                        .withCallback(new FixedValue() {
-
-                    @Override
-                    public Object loadObject() throws Exception {
-                        return null;
-                    }
-                }).withConstructionStrategy(this).create(injector);
-            }
-            return callConstructor(ctor, errors, args);
-        }
-    },
-
-    /**
      * Calls the injectable constructor of the scoped proxy type by passing
      * <code>null</code> as value for each parameter. This strategy can not be
      * used if the type bound as proxy performs any actions on the parameters
@@ -83,9 +46,15 @@ public enum ConstructionStrategies implements ConstructionStrategy {
         @Override
         public <T> T createInstance(Class<T> proxyClass, Injector injector,
                 Errors errors) {
-            final Constructor<T> ctor = getConstructorFor(proxyClass);
-            final Object[] args = new Object[ctor.getParameterCount()];
-            return callConstructor(ctor, errors, args);
+            try {
+                final Constructor<T> ctor= getConstructorFor(proxyClass);
+                final Object[] args = new Object[ctor.getParameterCount()];
+                return callConstructor(ctor, errors, args);
+            } catch (final NoSuchMethodException e) {
+                errors.addMessage(e.getMessage());
+                return null;
+            }
+
         }
     },
 
@@ -112,8 +81,24 @@ public enum ConstructionStrategies implements ConstructionStrategy {
     };
 
     @SuppressWarnings("unchecked")
-    protected <T> Constructor<T> getConstructorFor(Class<T> proxyClass) {
-        return (Constructor<T>) InjectionPoint.forConstructorOf(proxyClass).getMember();
+    protected <T> Constructor<T> getConstructorFor(Class<T> proxyClass)
+            throws NoSuchMethodException {
+        final Collection<Constructor<?>> ctors = Arrays
+                .stream(proxyClass.getConstructors())
+                .filter(member -> !Modifier.isPrivate(member.getModifiers()))
+                .collect(Collectors.toList());
+
+        if (ctors.isEmpty()) {
+            throw new NoSuchMethodException(String.format(
+                    "No accessible constructor can be found on type %s",
+                    proxyClass.getName()));
+        } else if (ctors.size() > 1) {
+            throw new NoSuchMethodException(String.format(
+                    "Type %s has multiple accessible constructors",
+                    proxyClass.getName()));
+        }
+
+        return (Constructor<T>) ctors.iterator().next();
     }
 
     protected <T> T callConstructor(Constructor<T> ctor, Errors errors, Object[] args) {
