@@ -12,6 +12,7 @@ import org.objenesis.instantiator.ObjectInstantiator;
 
 import com.google.inject.Injector;
 import com.google.inject.internal.Errors;
+import com.google.inject.spi.Message;
 
 /**
  * Holds some useful default {@link ConstructionStrategy construction
@@ -54,14 +55,13 @@ public enum ConstructionStrategies implements ConstructionStrategy {
                 errors.addMessage(e.getMessage());
                 return null;
             }
-
         }
     },
 
     /**
      * Completely forbids constructor injection on types bound as scoped proxy.
      * Using this strategy, only types that have a public no-argument
-     * constructor can be bound as scoped proxy.
+     * constructor or interfaces can be bound as scoped proxy.
      */
     FAIL_ON_CONSTRUCTOR {
 
@@ -72,9 +72,10 @@ public enum ConstructionStrategies implements ConstructionStrategy {
                 final Constructor<T> ctor = proxyClass.getConstructor();
                 return callConstructor(ctor, errors, new Object[0]);
             } catch (NoSuchMethodException | SecurityException e) {
-                errors.addMessage("scoped proxy '%s' has no no-argument constructor. " +
-                    "Use a different ConstructionStrategy to create proxies of that " +
-                    "object.", proxyClass.getName());
+                errors.addMessage(new Message(String.format(
+                        "scoped proxy '%s' has no no-argument constructor. " +
+                        "Use a different ConstructionStrategy to create proxies of " +
+                        "that object.", proxyClass.getName()), e));
                 return null;
             }
         }
@@ -106,7 +107,7 @@ public enum ConstructionStrategies implements ConstructionStrategy {
             return ctor.newInstance(args);
         } catch (InstantiationException | IllegalAccessException
                 | IllegalArgumentException | InvocationTargetException e) {
-            errors.addMessage("Error calling constructor");
+            errors.addMessage(new Message("Error calling constructor", e));
             return null;
         }
     }

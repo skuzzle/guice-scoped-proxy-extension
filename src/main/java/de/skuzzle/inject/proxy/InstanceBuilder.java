@@ -1,6 +1,7 @@
 package de.skuzzle.inject.proxy;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 
 import com.google.common.base.Preconditions;
 import com.google.inject.Injector;
@@ -74,6 +75,8 @@ final class InstanceBuilder<T> {
      */
     public static <E> InstanceBuilder<E> forType(Class<E> type) {
         Preconditions.checkNotNull(type, "type");
+        Preconditions.checkArgument(!Modifier.isFinal(type.getModifiers()),
+                "can not proxy final type %s", type.getName());
         return new InstanceBuilder<E>(type);
     }
 
