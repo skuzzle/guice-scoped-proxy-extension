@@ -2,16 +2,13 @@ package de.skuzzle.inject.proxy;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
-import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
-import java.io.Serializable;
 import java.lang.annotation.Annotation;
-import java.lang.annotation.Retention;
 import java.lang.reflect.Constructor;
 import java.util.Collections;
 import java.util.Set;
+import java.util.UUID;
 
-import javax.inject.Qualifier;
 import javax.inject.Singleton;
 
 import com.google.inject.Binder;
@@ -25,6 +22,7 @@ import com.google.inject.TypeLiteral;
 import com.google.inject.binder.LinkedBindingBuilder;
 import com.google.inject.binder.ScopedBindingBuilder;
 import com.google.inject.internal.BindingBuilder;
+import com.google.inject.name.Names;
 import com.google.inject.spi.Dependency;
 import com.google.inject.spi.HasDependencies;
 import com.google.inject.spi.Toolable;
@@ -118,11 +116,11 @@ public final class ScopedProxyBinder {
         }
 
         private Key<T> bindSource() {
-            final String name = this.source.getTypeLiteral().getRawType().getName();
             // backup the original binding using an internal annotation to
             // create a unique hidden key.
+            final UUID uuid = UUID.randomUUID();
             final Key<T> rewritten = Key.get(this.source.getTypeLiteral(),
-                    new OriginalImpl(name));
+                    Names.named(uuid.toString()));
 
             // bind the user specified source type to the provider which creates
             // the scoped proxy objects.
@@ -281,53 +279,6 @@ public final class ScopedProxyBinder {
         @Override
         public Set<Dependency<?>> getDependencies() {
             return this.dependencies;
-        }
-    }
-
-    @Retention(RUNTIME)
-    @Qualifier
-    private @interface Original {
-        String value();
-    }
-
-    private static final class OriginalImpl implements Annotation, Serializable, Original {
-        private static final long serialVersionUID = 0;
-        private final String value;
-
-        OriginalImpl(String value) {
-            this.value = checkNotNull(value, "value");
-        }
-
-        @Override
-        public String value() {
-            return this.value;
-        }
-
-        @Override
-        public int hashCode() {
-            // This is specified in java.lang.Annotation.
-            return (127 * "value".hashCode()) ^ this.value.hashCode();
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (o instanceof Original) {
-                final Original other = (Original) o;
-                return this.value.equals(other.value());
-            }
-            return false;
-        }
-
-        @Override
-        public String toString() {
-            return "@Original" + (this.value.isEmpty()
-                    ? ""
-                    : "(value=" + this.value + ")");
-        }
-
-        @Override
-        public Class<? extends Annotation> annotationType() {
-            return Original.class;
         }
     }
 }
