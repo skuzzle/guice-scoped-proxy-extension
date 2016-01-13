@@ -52,7 +52,7 @@ public enum ConstructionStrategies implements ConstructionStrategy {
                 final Object[] args = new Object[ctor.getParameterCount()];
                 return callConstructor(ctor, errors, args);
             } catch (final NoSuchMethodException e) {
-                errors.addMessage(e.getMessage());
+                errors.addMessage(new Message(e.getMessage(), e));
                 return null;
             }
         }
