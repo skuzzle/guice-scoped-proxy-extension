@@ -224,7 +224,7 @@ public final class ScopedProxyBinder {
             checkSingleton(Singleton.class);
         }
 
-        private void checkSingleton(Class<? extends Annotation> scopeAnnotation) {
+        private static void checkSingleton(Class<? extends Annotation> scopeAnnotation) {
             if (Singleton.class.equals(scopeAnnotation)
                     || com.google.inject.Singleton.class.equals(scopeAnnotation)) {
                     throw new UnsupportedOperationException("Scoped proxies can not be " +
@@ -236,7 +236,6 @@ public final class ScopedProxyBinder {
 
     private static class ScopedProxyProvider<T> implements Provider<T>, HasDependencies {
 
-        final Key<T> sourceKey;
         final Key<T> rewritten;
         final ConstructionStrategy strategy;
         Set<Dependency<?>> dependencies;
@@ -244,7 +243,6 @@ public final class ScopedProxyBinder {
 
         ScopedProxyProvider(Key<T> sourceKey, Key<T> rewrittenKey,
                 ConstructionStrategy strategy) {
-            this.sourceKey = sourceKey;
             this.rewritten = rewrittenKey;
             this.strategy = strategy;
             this.dependencies = Collections.singleton(
