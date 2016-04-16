@@ -103,7 +103,7 @@ public final class ScopedProxyBinder {
         private final Binder binder;
         private final ConstructionStrategy strategy;
         private final Key<T> source;
-        private final Key<T> rewritten;
+        private final Key<T> rewrittenKey;
         private BindingBuilder<T> targetBuilder;
 
         private FluentInterfaceImpl(Binder binder, Key<T> sourceKey,
@@ -111,7 +111,7 @@ public final class ScopedProxyBinder {
             this.binder = binder;
             this.strategy = strategy;
             this.source = sourceKey;
-            this.rewritten = bindSource();
+            this.rewrittenKey = bindSource();
             bindRewritten();
         }
 
@@ -133,7 +133,7 @@ public final class ScopedProxyBinder {
 
         private BindingBuilder<T> bindRewritten() {
             if (this.targetBuilder == null) {
-                this.targetBuilder = (BindingBuilder<T>) this.binder.bind(this.rewritten);
+                this.targetBuilder = (BindingBuilder<T>) this.binder.bind(this.rewrittenKey);
             }
             return this.targetBuilder;
         }
