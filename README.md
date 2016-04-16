@@ -1,5 +1,7 @@
 [![Build Status](https://travis-ci.org/skuzzle/guice-scoped-proxy-extension.svg?branch=master)](https://travis-ci.org/skuzzle/guice-scoped-proxy-extension) [![Maven Central](https://maven-badges.herokuapp.com/maven-central/de.skuzzle.inject/guice-scoped-proxy-extension/badge.svg)](https://maven-badges.herokuapp.com/maven-central/de.skuzzle.inject/guice-scoped-proxy-extension)
 [![Coverage Status](https://coveralls.io/repos/skuzzle/guice-scoped-proxy-extension/badge.svg?branch=master&service=github)](https://coveralls.io/github/skuzzle/guice-scoped-proxy-extension?branch=master)
+[![JavaDoc](http://javadoc-badge.appspot.com/de.skuzzle.inject/guice-scoped-proxy-extension.svg?label=JavaDoc)](http://javadoc-badge.appspot.com/de.skuzzle.inject/guice-scoped-proxy-extension)
+
 # Guice Scoped Proxies
 
 Bind classes as scoped proxies to inject them into wider scopes without the need to use
