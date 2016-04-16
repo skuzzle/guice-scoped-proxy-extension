@@ -48,7 +48,7 @@ public enum ConstructionStrategies implements ConstructionStrategy {
         public <T> T createInstance(Class<T> proxyClass, Injector injector,
                 Errors errors) {
             try {
-                final Constructor<T> ctor= getConstructorFor(proxyClass);
+                final Constructor<T> ctor = getConstructorFor(proxyClass);
                 final Object[] args = new Object[ctor.getParameterCount()];
                 return callConstructor(ctor, errors, args);
             } catch (final NoSuchMethodException e) {
