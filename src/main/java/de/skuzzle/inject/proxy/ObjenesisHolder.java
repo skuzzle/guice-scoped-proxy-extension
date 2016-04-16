@@ -8,11 +8,11 @@ final class ObjenesisHolder {
     // with caching
     private static final Objenesis INSTANCE = new ObjenesisStd(true);
 
-    static Objenesis getInstance() {
-        return INSTANCE;
-    }
-
     private ObjenesisHolder() {
         // hidden
+    }
+
+    static Objenesis getInstance() {
+        return INSTANCE;
     }
 }
