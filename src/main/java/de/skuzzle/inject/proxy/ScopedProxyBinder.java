@@ -13,9 +13,11 @@ import javax.inject.Singleton;
 
 import com.google.inject.Binder;
 import com.google.inject.Binding;
+import com.google.inject.BindingAnnotation;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Key;
+import com.google.inject.Module;
 import com.google.inject.Provider;
 import com.google.inject.Scope;
 import com.google.inject.TypeLiteral;
@@ -28,7 +30,23 @@ import com.google.inject.spi.HasDependencies;
 import com.google.inject.spi.Toolable;
 
 /**
- * Allows to bind classes and interfaces as scoped proxies.
+ * Allows to bind classes and interfaces as scoped proxies. Use it in a
+ * {@link Module} like this:
+ *
+ * <pre>
+ * public class MyModule extends AbstractModule {
+ *     &#64;Override
+ *     public void configure() {
+ *         ScopedProxyBinder.using(binder())
+ *                 .bind(MyServiceImpl.class)
+ *                 .in(RequestScope.class);
+ *     }
+ * }
+ * </pre>
+ *
+ * You can then inject {@code MyServiceImpl} into broader scopes like singleton
+ * as if you were injecting a {@code Provider<MyServiceImpl>}.
+ *
  * @author Simon Taddiken
  */
 public final class ScopedProxyBinder {
@@ -37,6 +55,12 @@ public final class ScopedProxyBinder {
         // hidden constructor;
     }
 
+    /**
+     * Starts building a scoped proxy binding using the given {@link Binder}.
+     *
+     * @param binder the binder to create the binding with.
+     * @return Builder object for specifying the binding.
+     */
     public static ScopedProxyBuilder using(Binder binder) {
         checkNotNull(binder, "binder");
         return new ScopedProxyBuilderImpl(binder);
@@ -44,15 +68,53 @@ public final class ScopedProxyBinder {
 
     public interface ScopedProxyBuilder {
 
+        /**
+         * Specifies the {@link ConstructionStrategy} that will be used to
+         * instantiate proxy objects. the class {@link ConstructionStrategies}
+         * holds some default implementations. In most cases modifying the
+         * strategy is not necessary.
+         *
+         * @param strategy The construction strategy.
+         * @return The builder object.
+         */
         ScopedProxyBuilder andConstructionStrategy(ConstructionStrategy strategy);
 
+        /**
+         * Specifies the type to bind.
+         *
+         * @param <T> The type to bind.
+         * @param cls The type to bind.
+         * @return The builder object.
+         */
         <T> LinkedBindingBuilder<T> bind(Class<T> cls);
 
+        /**
+         * Specifies the type to bind with an additional {@link BindingAnnotation}.
+         *
+         * @param <T> The type to bind.
+         * @param cls The type to bind.
+         * @param annotationClass The binding annotation type.
+         * @return The builder object.
+         */
         <T> LinkedBindingBuilder<T> bind(Class<T> cls,
                 Class<? extends Annotation> annotationClass);
 
+        /**
+         * Specifies the type to bind with an additional {@link BindingAnnotation}.
+         *
+         * @param <T> The type to bind.
+         * @param cls The type to bind.
+         * @param annotation The binding annotation.
+         * @return The builder object.
+         */
         <T> LinkedBindingBuilder<T> bind(Class<T> cls, Annotation annotation);
 
+        /**
+         * Specifies the {@link Key} to bind.
+         * @param <T> The type to bind.
+         * @param key The key.
+         * @return The builder object.
+         */
         <T> LinkedBindingBuilder<T> bind(Key<T> key);
     }
 
@@ -92,8 +154,7 @@ public final class ScopedProxyBinder {
         @Override
         public <T> LinkedBindingBuilder<T> bind(Key<T> sourceKey) {
             checkNotNull(sourceKey);
-            return new FluentInterfaceImpl<T>(this.binder, sourceKey,
-                    this.strategy);
+            return new FluentInterfaceImpl<T>(this.binder, sourceKey, this.strategy);
         }
     }
 
@@ -125,15 +186,16 @@ public final class ScopedProxyBinder {
             // bind the user specified source type to the provider which creates
             // the scoped proxy objects.
             this.binder.bind(this.source)
-                    .toProvider(new ScopedProxyProvider<>(
-                            this.source, rewritten, this.strategy))
+                    .toProvider(
+                            new ScopedProxyProvider<>(this.source, rewritten, this.strategy))
                     .in(Singleton.class);
             return rewritten;
         }
 
         private BindingBuilder<T> bindRewritten() {
             if (this.targetBuilder == null) {
-                this.targetBuilder = (BindingBuilder<T>) this.binder.bind(this.rewrittenKey);
+                this.targetBuilder = (BindingBuilder<T>) this.binder.bind(
+                        this.rewrittenKey);
             }
             return this.targetBuilder;
         }
@@ -225,10 +287,10 @@ public final class ScopedProxyBinder {
         }
 
         private static void checkSingleton(Class<? extends Annotation> scopeAnnotation) {
-            if (Singleton.class.equals(scopeAnnotation)
-                    || com.google.inject.Singleton.class.equals(scopeAnnotation)) {
-                    throw new UnsupportedOperationException("Scoped proxies can not be " +
-                            "bound as singleton. Theres is no reason to do this");
+            if (Singleton.class.equals(scopeAnnotation) ||
+                com.google.inject.Singleton.class.equals(scopeAnnotation)) {
+                throw new UnsupportedOperationException("Scoped proxies can not be " +
+                    "bound as singleton. Theres is no reason to do this");
             }
 
         }
