@@ -1,6 +1,5 @@
 package de.skuzzle.inject.proxy;
 
-import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
 import com.google.common.base.Preconditions;
@@ -25,18 +24,12 @@ import net.sf.cglib.proxy.InvocationHandler;
 final class InstanceBuilder<T> {
 
     /**
-     * The unique callback index to which each method in the proxy object is
-     * mapped.
+     * The unique callback index to which each method in the proxy object is mapped.
      */
     private static final int CALLBACK_INDEX = 0;
 
     /** Maps all methods to index {@link #CALLBACK_INDEX}. */
-    private static final CallbackFilter ZERO_CALLBACK_FILTER = new CallbackFilter() {
-        @Override
-        public int accept(Method method) {
-            return CALLBACK_INDEX;
-        }
-    };
+    private static final CallbackFilter ZERO_CALLBACK_FILTER = method -> CALLBACK_INDEX;
 
     /** Naming strategy for our enhancer */
     private static final NamingPolicy ENHANCER_NAMING = new DefaultNamingPolicy() {
@@ -56,8 +49,7 @@ final class InstanceBuilder<T> {
 
     private final Enhancer enhancer;
     private Callback dispatcher;
-    private ConstructionStrategy constructionStrategy =
-            ConstructionStrategies.NULL_VALUES;
+    private ConstructionStrategy constructionStrategy = ConstructionStrategies.NULL_VALUES;
 
     private InstanceBuilder(Class<T> superType) {
         this.enhancer = new Enhancer();
@@ -77,13 +69,12 @@ final class InstanceBuilder<T> {
         Preconditions.checkNotNull(type, "type");
         Preconditions.checkArgument(!Modifier.isFinal(type.getModifiers()),
                 "can not proxy final type %s", type.getName());
-        return new InstanceBuilder<E>(type);
+        return new InstanceBuilder<>(type);
     }
 
     /**
-     * Specifies the scoped provider. Every method call on the object created by
-     * this builder will be delegated to the object returned by the given
-     * provider.
+     * Specifies the scoped provider. Every method call on the object created by this
+     * builder will be delegated to the object returned by the given provider.
      * <p>
      * This method overrides the callback set by {@link #withCallback(Callback)}.
      *
@@ -93,20 +84,15 @@ final class InstanceBuilder<T> {
      */
     public InstanceBuilder<T> dispatchTo(Provider<T> provider) {
         Preconditions.checkNotNull(provider, "provider");
-        this.dispatcher = new InvocationHandler() {
-
-            @Override
-            public Object invoke(Object proxy, Method method, Object[] args)
-                    throws Throwable {
-                return method.invoke(provider.get(), args);
-            }
-        };
+        final InvocationHandler callback = (proxy, method, args) -> method
+                .invoke(provider.get(), args);
+        this.dispatcher = callback;
         return this;
     }
 
     /**
-     * Sets the single callback to which all method calls of the created object
-     * are delegated.
+     * Sets the single callback to which all method calls of the created object are
+     * delegated.
      * <p>
      * This method overrides the provider based callback set by
      * {@link #dispatchTo(Provider)}.
@@ -122,8 +108,8 @@ final class InstanceBuilder<T> {
     }
 
     /**
-     * Sets the strategy that is used to instantiate proxies of concrete classes
-     * that require constructor arguments.
+     * Sets the strategy that is used to instantiate proxies of concrete classes that
+     * require constructor arguments.
      *
      * @param strategy The strategy.
      * @return Builder object for further configuration.
