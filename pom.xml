@@ -44,70 +44,54 @@
 		<tag>HEAD</tag>
 	</scm>
 
-	<dependencyManagement>
-		<dependencies>
-			<dependency>
-				<groupId>de.skuzzle</groupId>
-				<artifactId>skuzzle-runtime</artifactId>
-				<version>${skuzzle.runtime.version}</version>
-				<type>pom</type>
-				<scope>import</scope>
-			</dependency>
-
-			<dependency>
-				<groupId>org.objenesis</groupId>
-				<artifactId>objenesis</artifactId>
-				<version>3.0.1</version>
-			</dependency>
-			<dependency>
-				<groupId>cglib</groupId>
-				<artifactId>cglib</artifactId>
-				<version>3.2.10</version>
-				<exclusions>
-					<!-- https://github.com/cglib/cglib/issues/144 -->
-					<exclusion>
-						<groupId>org.apache.ant</groupId>
-						<artifactId>ant</artifactId>
-					</exclusion>
-				</exclusions>
-			</dependency>
-		</dependencies>
-	</dependencyManagement>
-
 	<dependencies>
 		<dependency>
 			<groupId>org.objenesis</groupId>
 			<artifactId>objenesis</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>cglib</groupId>
-			<artifactId>cglib</artifactId>
+			<version>3.0.1</version>
 		</dependency>
 
 		<dependency>
+			<groupId>cglib</groupId>
+			<artifactId>cglib</artifactId>
+			<version>3.2.10</version>
+			<exclusions>
+				<!-- https://github.com/cglib/cglib/issues/144 -->
+				<exclusion>
+					<groupId>org.apache.ant</groupId>
+					<artifactId>ant</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava</artifactId>
+			<version>27.0-jre</version>
 		</dependency>
 
 		<!-- Guice -->
 		<dependency>
 			<groupId>com.google.inject</groupId>
 			<artifactId>guice</artifactId>
+			<version>4.2.2</version>
 		</dependency>
 
 		<dependency>
 			<groupId>javax.inject</groupId>
 			<artifactId>javax.inject</artifactId>
+			<version>1</version>
 		</dependency>
 
 		<!-- Test -->
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
+			<version>4.12</version>
 		</dependency>
 		<dependency>
 			<groupId>org.mockito</groupId>
 			<artifactId>mockito-all</artifactId>
+			<version>1.10.19</version>
 		</dependency>
 	</dependencies>
 
