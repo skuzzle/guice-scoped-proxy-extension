@@ -11,5 +11,5 @@ module de.skuzzle.inject.proxy {
     requires guava;
     requires transitive guice;
     requires javax.inject;
-    requires objenesis;
+    requires org.objenesis;
 }
