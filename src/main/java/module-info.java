@@ -1,7 +1,4 @@
 /**
- *
- */
-/**
  * @author Simon Taddiken
  */
 module de.skuzzle.inject.proxy {
