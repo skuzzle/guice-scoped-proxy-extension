@@ -7,16 +7,13 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.stream.Collectors;
 
-import org.objenesis.Objenesis;
-import org.objenesis.instantiator.ObjectInstantiator;
-
 import com.google.inject.Injector;
 import com.google.inject.internal.Errors;
 import com.google.inject.spi.Message;
 
 /**
- * Holds some useful default {@link ConstructionStrategy construction
- * strategies} for building scoped proxy objects for concrete classes.
+ * Holds some useful default {@link ConstructionStrategy construction strategies} for
+ * building scoped proxy objects for concrete classes.
  *
  * @author Simon Taddiken
  */
@@ -29,18 +26,17 @@ public enum ConstructionStrategies implements ConstructionStrategy {
         @Override
         public <T> T createInstance(Class<T> proxyClass, Injector injector,
                 Errors errors) {
-            final Objenesis objenesis = ObjenesisHolder.getInstance();
-            final ObjectInstantiator<T> instantiator = objenesis.getInstantiatorOf(
-                    proxyClass);
-
-            return instantiator.newInstance();
+            return ObjenesisHolder
+                    .getInstance()
+                    .getInstantiatorOf(proxyClass)
+                    .newInstance();
         }
     },
     /**
      * Calls the injectable constructor of the scoped proxy type by passing
-     * <code>null</code> as value for each parameter. This strategy can not be
-     * used if the type bound as proxy performs any actions on the parameters
-     * passed to its constructor.
+     * <code>null</code> as value for each parameter. This strategy can not be used if the
+     * type bound as proxy performs any actions on the parameters passed to its
+     * constructor.
      */
     NULL_VALUES {
 
@@ -59,9 +55,9 @@ public enum ConstructionStrategies implements ConstructionStrategy {
     },
 
     /**
-     * Completely forbids constructor injection on types bound as scoped proxy.
-     * Using this strategy, only types that have a public no-argument
-     * constructor or interfaces can be bound as scoped proxy.
+     * Completely forbids constructor injection on types bound as scoped proxy. Using this
+     * strategy, only types that have a public no-argument constructor or interfaces can
+     * be bound as scoped proxy.
      */
     FAIL_ON_CONSTRUCTOR {
 
@@ -74,8 +70,10 @@ public enum ConstructionStrategies implements ConstructionStrategy {
             } catch (NoSuchMethodException | SecurityException e) {
                 errors.addMessage(new Message(String.format(
                         "scoped proxy '%s' has no no-argument constructor. " +
-                        "Use a different ConstructionStrategy to create proxies of " +
-                        "that object.", proxyClass.getName()), e));
+                                "Use a different ConstructionStrategy to create proxies of "
+                                +
+                                "that object.",
+                        proxyClass.getName()), e));
                 return null;
             }
         }
