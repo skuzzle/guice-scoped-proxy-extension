@@ -68,6 +68,11 @@
 			<artifactId>guava</artifactId>
 			<version>27.0-jre</version>
 		</dependency>
+		<dependency>
+			<groupId>org.ow2.asm</groupId>
+			<artifactId>asm</artifactId>
+			<version>7.0</version>
+		</dependency>
 
 		<!-- Guice -->
 		<dependency>
