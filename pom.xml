@@ -11,7 +11,7 @@
 
 	<groupId>de.skuzzle.inject</groupId>
 	<artifactId>guice-scoped-proxy-extension</artifactId>
-	<version>0.2.0</version>
+	<version>0.2.1-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
 	<name>Guice scoped proxy extension</name>
@@ -38,7 +38,7 @@
 
 	<scm>
 		<developerConnection>scm:git:https://github.com/skuzzle/${github.name}.git</developerConnection>
-		<tag>v0.2.0</tag>
+		<tag>HEAD</tag>
 	</scm>
 
 	<dependencies>
